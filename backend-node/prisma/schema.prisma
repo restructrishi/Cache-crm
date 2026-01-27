@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://admin:password@localhost:5432/cache_crm?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -93,6 +93,8 @@ model User {
   passwordHash   String    @map("password_hash") @db.VarChar(255)
   fullName       String?   @map("full_name") @db.VarChar(100)
   phone          String?   @db.VarChar(50)
+  department     String?   @db.VarChar(50)
+  accessLevel    String?   @default("VIEW_ONLY") @map("access_level") @db.VarChar(50)
   isActive       Boolean?  @default(true) @map("is_active")
   lastLogin      DateTime? @map("last_login") @db.Timestamptz(6)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)

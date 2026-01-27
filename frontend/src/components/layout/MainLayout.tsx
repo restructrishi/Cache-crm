@@ -6,7 +6,7 @@ import { OnboardingTour } from '../onboarding/OnboardingTour';
 
 export const MainLayout: React.FC = () => {
     return (
-        <div className="flex h-screen bg-gray-50/50 dark:bg-black text-gray-900 dark:text-gray-100 font-sans overflow-hidden">
+        <div className="flex h-full w-full bg-gray-50/50 dark:bg-black text-gray-900 dark:text-gray-100 font-sans overflow-hidden">
             {/* Sidebar */}
             <Sidebar />
 

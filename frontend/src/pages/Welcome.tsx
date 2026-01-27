@@ -56,7 +56,7 @@ export const Welcome: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white relative overflow-hidden flex flex-col transition-colors duration-500">
+        <div className="h-full w-full overflow-auto bg-white dark:bg-black text-gray-900 dark:text-white relative flex flex-col transition-colors duration-500 custom-scrollbar">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-900/20 dark:via-black dark:to-purple-900/20 pointer-events-none" />
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />

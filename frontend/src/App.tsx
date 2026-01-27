@@ -36,9 +36,11 @@ const RoleRoute = ({ allowedRoles, children }: { allowedRoles: string[], childre
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
+      {/* APP SHELL - ROOT LAYOUT RULE */}
+      <div className="h-screen w-screen overflow-hidden bg-white dark:bg-black text-gray-900 dark:text-gray-100">
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
@@ -98,7 +100,7 @@ function App() {
                   {/* Role-Specific Access within App Layout */}
                   <Route path="scm" element={
                       <RoleRoute allowedRoles={['Super Admin', 'Admin']}>
-                           <ComingSoon title="SCM & Inventory" features={["Inventory Tracking", "Supplier Management", "Logistics Optimization"]} />
+                          <ComingSoon title="SCM & Inventory" features={["Inventory Tracking", "Supplier Management", "Logistics Optimization"]} />
                       </RoleRoute>
                   } />
                   <Route path="deployment" element={
@@ -123,7 +125,8 @@ function App() {
               <Route path="*" element={<Navigate to="/welcome" replace />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </div>
     </ThemeProvider>
   );
 }

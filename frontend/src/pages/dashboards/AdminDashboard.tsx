@@ -1,7 +1,50 @@
-import React from 'react';
-import { Users, Building, FileText, Settings, UserPlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Building, FileText, Settings, UserPlus, Loader2 } from 'lucide-react';
+import { AddMemberDrawer } from '../../components/dashboards/AddMemberDrawer';
+
+interface User {
+    id: string;
+    fullName: string;
+    email: string;
+    department: string;
+    accessLevel: string;
+    isActive: boolean;
+    lastLogin: string | null;
+}
 
 export const AdminDashboard: React.FC = () => {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchUsers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3000/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUsers(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch users', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    // Stats
+    const totalUsers = users.length;
+    const departments = new Set(users.map(u => u.department).filter(Boolean)).size;
+    const activeUsers = users.filter(u => u.isActive).length;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -9,7 +52,10 @@ export const AdminDashboard: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Overview</h1>
                     <p className="text-sm text-gray-500 mt-1">Manage your organization's resources and team</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button 
+                    onClick={() => setIsDrawerOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
                     <UserPlus className="w-4 h-4" /> Invite Member
                 </button>
             </div>
@@ -22,7 +68,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Total Users</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">24</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{totalUsers}</h3>
                         </div>
                     </div>
                 </div>
@@ -33,7 +79,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">4</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{departments}</h3>
                         </div>
                     </div>
                 </div>
@@ -43,8 +89,8 @@ export const AdminDashboard: React.FC = () => {
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Active Licenses</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">20/50</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Active Users</p>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{activeUsers}</h3>
                         </div>
                     </div>
                 </div>
@@ -55,30 +101,71 @@ export const AdminDashboard: React.FC = () => {
                     <h3 className="font-bold text-gray-900 dark:text-white">Team Members</h3>
                 </div>
                 <div className="p-6">
-                    <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-                        <thead>
-                            <tr className="border-b border-gray-100 dark:border-gray-800">
-                                <th className="pb-3 font-semibold">Name</th>
-                                <th className="pb-3 font-semibold">Role</th>
-                                <th className="pb-3 font-semibold">Status</th>
-                                <th className="pb-3 font-semibold">Last Active</th>
-                                <th className="pb-3 font-semibold">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {[1, 2, 3, 4].map((i) => (
-                                <tr key={i} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                    <td className="py-4 font-medium text-gray-900 dark:text-white">User {i}</td>
-                                    <td className="py-4">Sales Rep</td>
-                                    <td className="py-4"><span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</span></td>
-                                    <td className="py-4">2 hours ago</td>
-                                    <td className="py-4 text-blue-600 hover:text-blue-500 cursor-pointer">Edit</td>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                        </div>
+                    ) : (
+                        <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
+                            <thead>
+                                <tr className="border-b border-gray-100 dark:border-gray-800">
+                                    <th className="pb-3 font-semibold">Name / Email</th>
+                                    <th className="pb-3 font-semibold">Department</th>
+                                    <th className="pb-3 font-semibold">Access</th>
+                                    <th className="pb-3 font-semibold">Status</th>
+                                    <th className="pb-3 font-semibold">Last Active</th>
+                                    <th className="pb-3 font-semibold">Action</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                {users.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="py-8 text-center text-gray-500">
+                                            No users found. Invite your first member!
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    users.map((user) => (
+                                        <tr key={user.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                            <td className="py-4 font-medium text-gray-900 dark:text-white">
+                                                <div>{user.fullName || 'N/A'}</div>
+                                                <div className="text-xs text-gray-500">{user.email}</div>
+                                            </td>
+                                            <td className="py-4">{user.department || '-'}</td>
+                                            <td className="py-4">
+                                                <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                                    {user.accessLevel?.replace('_', ' ')}
+                                                </span>
+                                            </td>
+                                            <td className="py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                                    user.isActive 
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                }`}>
+                                                    {user.isActive ? 'Active' : 'Disabled'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4">
+                                                {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                                            </td>
+                                            <td className="py-4 text-blue-600 hover:text-blue-500 cursor-pointer">
+                                                Edit
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
+
+            <AddMemberDrawer 
+                isOpen={isDrawerOpen} 
+                onClose={() => setIsDrawerOpen(false)}
+                onSuccess={fetchUsers}
+            />
         </div>
     );
 };

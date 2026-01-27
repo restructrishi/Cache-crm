@@ -31,7 +31,7 @@ export const Signup: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-black text-white overflow-hidden">
+        <div className="h-full w-full overflow-auto flex bg-black text-white custom-scrollbar">
             {/* Left Side - Form */}
             <motion.div 
                 initial={{ opacity: 0, x: -20 }}

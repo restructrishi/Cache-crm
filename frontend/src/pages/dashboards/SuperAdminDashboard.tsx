@@ -3,7 +3,7 @@ import { Shield, Server, Users, Activity, Lock, Globe } from 'lucide-react';
 
 export const SuperAdminDashboard: React.FC = () => {
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
+        <div className="h-full w-full overflow-auto bg-zinc-950 text-zinc-100 p-8 custom-scrollbar">
             <header className="mb-10 flex items-center justify-between border-b border-zinc-800 pb-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-white">Platform Command Center</h1>
