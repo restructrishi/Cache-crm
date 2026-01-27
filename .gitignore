@@ -1,0 +1,97 @@
+############################
+# Dependencies (ALL levels)
+############################
+node_modules/
+**/node_modules/
+
+############################
+# Environment Variables (CRITICAL)
+############################
+.env
+.env.*
+!.env.example
+
+############################
+# Backend Build (NestJS)
+############################
+backend-node/dist/
+backend-node/prisma/*.log
+backend-node/prisma/migrations/
+
+############################
+# Frontend Build (Vite / React)
+############################
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+
+############################
+# General Build Artifacts
+############################
+dist/
+build/
+out/
+
+############################
+# Logs
+############################
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+############################
+# Testing / Coverage
+############################
+coverage/
+.nyc_output/
+
+############################
+# Database (Local Only)
+############################
+*.sqlite
+*.sqlite3
+*.db
+
+############################
+# OS / Editor
+############################
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+############################
+# Docker
+############################
+docker-data/
+*.env.docker
+
+############################
+# Cloud / Hosting
+############################
+.vercel/
+.netlify/
+.firebase/
+.aws/
+
+############################
+# Security
+############################
+*.pem
+*.key
+*.crt
+
+############################
+# Package Managers
+############################
+.pnpm-store/
+
+############################
+# Misc
+############################
+*.tgz
+*.tar.gz

@@ -1,0 +1,624 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://admin:password@localhost:5432/cache_crm?schema=public"
+}
+
+model Organization {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String   @db.VarChar(255)
+  domain           String?  @unique @db.VarChar(255)
+  subscriptionPlan String?  @default("FREE") @map("subscription_plan") @db.VarChar(50)
+  address          String?
+  phone            String?  @db.VarChar(50)
+  website          String?  @db.VarChar(255)
+  isActive         Boolean? @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  users          User[]
+  roles          Role[]
+  accounts       Account[]
+  contacts       Contact[]
+  leads          Lead[]
+  deals          Deal[]
+  meetings       Meeting[]
+  products       Product[]
+  quotes         Quote[]
+  customerPos    CustomerPo[]
+  vendorOrders   VendorOrder[]
+  deployments    Deployment[]
+  invoices       Invoice[]
+  payments       Payment[]
+  tickets        Ticket[]
+  deliveryTracking DeliveryTracking[]
+  auditLogs      AuditLog[]
+
+  // PreSales
+  solutionDesigns SolutionDesign[]
+  boqHeaders      BoqHeader[]
+  sowDocuments    SowDocument[]
+
+  // SCM
+  grnReceipts     GrnReceipt[]
+
+  @@map("organizations")
+}
+
+model Role {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(50)
+  description    String?
+  isSystemRole   Boolean? @default(false) @map("is_system_role")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization    Organization?     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@unique([organizationId, name])
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(100)
+  description String?
+  module      String?  @db.VarChar(50)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String?   @map("organization_id") @db.Uuid
+  email          String    @db.VarChar(255)
+  passwordHash   String    @map("password_hash") @db.VarChar(255)
+  fullName       String?   @map("full_name") @db.VarChar(100)
+  phone          String?   @db.VarChar(50)
+  isActive       Boolean?  @default(true) @map("is_active")
+  lastLogin      DateTime? @map("last_login") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userRoles    UserRole[]
+
+  // Owner/Creator relations
+  accountsOwned    Account[]        @relation("AccountOwner")
+  accountsCreated  Account[]        @relation("AccountCreator")
+  leadsOwned       Lead[]           @relation("LeadOwner")
+  dealsOwned       Deal[]           @relation("DealOwner")
+  dealStageChanges DealStageHistory[]
+  meetingsHosted   Meeting[]
+  momsSubmitted    MeetingMom[]
+  actionItemsOwned ActionItem[]
+  quotesCreated    Quote[]
+  ticketsCreated   Ticket[]         @relation("TicketCreator")
+  ticketsAssigned  Ticket[]         @relation("TicketAssignee")
+  ticketComments   TicketComment[]
+  deploymentsEng   Deployment[]
+  grnReceivedBy    GrnReceipt[]
+  solutionDesignsCreated SolutionDesign[]
+
+  auditLogs AuditLog[]
+
+  @@unique([organizationId, email])
+  @@map("users")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  action         String   @db.VarChar(100)
+  entityTable    String?  @map("entity_table") @db.VarChar(50)
+  entityId       String?  @map("entity_id") @db.Uuid
+  details        Json?
+  ipAddress      String?  @map("ip_address") @db.VarChar(45)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// CRM CORE
+
+model Account {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  industry       String?  @db.VarChar(100)
+  website        String?  @db.VarChar(255)
+  phone          String?  @db.VarChar(50)
+  address        String?
+  ownerId        String?  @map("owner_id") @db.Uuid
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner        User?         @relation("AccountOwner", fields: [ownerId], references: [id])
+  creator      User?         @relation("AccountCreator", fields: [createdBy], references: [id])
+  contacts     Contact[]
+  deals        Deal[]
+
+  @@map("accounts")
+}
+
+model Contact {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  accountId      String?  @map("account_id") @db.Uuid
+  firstName      String?  @map("first_name") @db.VarChar(100)
+  lastName       String?  @map("last_name") @db.VarChar(100)
+  email          String?  @db.VarChar(255)
+  phone          String?  @db.VarChar(50)
+  designation    String?  @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  account      Account?      @relation(fields: [accountId], references: [id])
+  deals        Deal[]
+
+  @@map("contacts")
+}
+
+model Lead {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  firstName      String?  @map("first_name") @db.VarChar(100)
+  lastName       String?  @map("last_name") @db.VarChar(100)
+  email          String?  @db.VarChar(255)
+  phone          String?  @db.VarChar(50)
+  company        String?  @db.VarChar(255)
+  source         String?  @db.VarChar(50)
+  status         String?  @default("New") @db.VarChar(50)
+  ownerId        String?  @map("owner_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner        User?         @relation("LeadOwner", fields: [ownerId], references: [id])
+  meetings     Meeting[]
+
+  @@map("leads")
+}
+
+model Deal {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String?   @map("organization_id") @db.Uuid
+  accountId         String?   @map("account_id") @db.Uuid
+  contactId         String?   @map("contact_id") @db.Uuid
+  name              String    @db.VarChar(255)
+  amount            Decimal?  @db.Decimal(15, 2)
+  stage             String?   @default("Qualifying") @db.VarChar(50)
+  dealType          String    @map("deal_type") @db.VarChar(50)
+  probability       Int?      @default(10)
+  expectedCloseDate DateTime? @map("expected_close_date") @db.Date
+  ownerId           String?   @map("owner_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  account      Account?      @relation(fields: [accountId], references: [id])
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  owner        User?         @relation("DealOwner", fields: [ownerId], references: [id])
+
+  stageHistory    DealStageHistory[]
+  meetings        Meeting[]
+  quotes          Quote[]
+  customerPos     CustomerPo[]
+  deployments     Deployment[]
+  invoices        Invoice[]
+  solutionDesigns SolutionDesign[]
+  boqHeaders      BoqHeader[]
+  sowDocuments    SowDocument[]
+
+  @@map("deals")
+}
+
+model DealStageHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  dealId    String?  @map("deal_id") @db.Uuid
+  fromStage String?  @map("from_stage") @db.VarChar(50)
+  toStage   String?  @map("to_stage") @db.VarChar(50)
+  changedBy String?  @map("changed_by") @db.Uuid
+  changedAt DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
+
+  deal      Deal? @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  user      User? @relation(fields: [changedBy], references: [id])
+
+  @@map("deal_stage_history")
+}
+
+// ACTIVITY & MOM
+
+model Meeting {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  title          String   @db.VarChar(255)
+  description    String?
+  startTime      DateTime @map("start_time") @db.Timestamptz(6)
+  endTime        DateTime @map("end_time") @db.Timestamptz(6)
+  dealId         String?  @map("deal_id") @db.Uuid
+  leadId         String?  @map("lead_id") @db.Uuid
+  hostId         String?  @map("host_id") @db.Uuid
+  status         String?  @default("Scheduled") @db.VarChar(50)
+  momSubmitted   Boolean? @default(false) @map("mom_submitted")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id])
+  lead         Lead?         @relation(fields: [leadId], references: [id])
+  host         User?         @relation(fields: [hostId], references: [id])
+  mom          MeetingMom[]
+
+  @@map("meetings")
+}
+
+model MeetingMom {
+  id              String    @id @default(uuid()) @db.Uuid
+  meetingId       String?   @map("meeting_id") @db.Uuid
+  summary         String
+  discussionPoints String?  @map("discussion_points")
+  nextFollowUpDate DateTime? @map("next_follow_up_date") @db.Timestamptz(6)
+  submittedBy     String?   @map("submitted_by") @db.Uuid
+  submittedAt     DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
+
+  meeting     Meeting?     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  submittedByUser User?    @relation(fields: [submittedBy], references: [id])
+  actionItems ActionItem[]
+
+  @@map("meeting_moms")
+}
+
+model ActionItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  meetingMomId   String?  @map("meeting_mom_id") @db.Uuid
+  description    String   @db.VarChar(255)
+  ownerId        String?  @map("owner_id") @db.Uuid
+  dueDate        DateTime? @map("due_date") @db.Date
+  status         String?  @default("Pending") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  meetingMom MeetingMom? @relation(fields: [meetingMomId], references: [id], onDelete: Cascade)
+  owner      User?       @relation(fields: [ownerId], references: [id])
+
+  @@map("action_items")
+}
+
+// PreSales
+
+model SolutionDesign {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  designDocUrl   String?  @map("design_doc_url")
+  description    String?
+  status         String?  @default("Draft") @db.VarChar(50)
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  creator      User?         @relation(fields: [createdBy], references: [id])
+  boqHeaders   BoqHeader[]
+
+  @@map("solution_designs")
+}
+
+model BoqHeader {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String?  @map("organization_id") @db.Uuid
+  dealId           String?  @map("deal_id") @db.Uuid
+  solutionDesignId String?  @map("solution_design_id") @db.Uuid
+  totalEstimatedCost Decimal? @map("total_estimated_cost") @db.Decimal(15, 2)
+  status           String?  @default("Draft") @db.VarChar(50)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal           Deal?           @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  solutionDesign SolutionDesign? @relation(fields: [solutionDesignId], references: [id])
+  boqItems       BoqItem[]
+
+  @@map("boq_headers")
+}
+
+model BoqItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  boqId       String?  @map("boq_id") @db.Uuid
+  productName String?  @map("product_name") @db.VarChar(255)
+  description String?
+  quantity    Int?
+  unitCost    Decimal? @map("unit_cost") @db.Decimal(15, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  boqHeader BoqHeader? @relation(fields: [boqId], references: [id], onDelete: Cascade)
+
+  @@map("boq_items")
+}
+
+model SowDocument {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  documentUrl    String?  @map("document_url")
+  version        Int?     @default(1)
+  status         String?  @default("Draft") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@map("sow_documents")
+}
+
+// QUOTES
+
+model Product {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  sku            String?  @db.VarChar(100)
+  category       String?  @db.VarChar(100)
+  unitPrice      Decimal? @map("unit_price") @db.Decimal(15, 2)
+  description    String?
+  isActive       Boolean? @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quoteItems   QuoteItem[]
+
+  @@map("products")
+}
+
+model Quote {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  quoteNumber    String   @map("quote_number") @db.VarChar(50)
+  version        Int?     @default(1)
+  status         String?  @default("Draft") @db.VarChar(50)
+  totalAmount    Decimal? @default(0) @map("total_amount") @db.Decimal(15, 2)
+  validUntil     DateTime? @map("valid_until") @db.Date
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  creator      User?         @relation(fields: [createdBy], references: [id])
+  quoteItems   QuoteItem[]
+  customerPos  CustomerPo[]
+
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  quoteId     String?  @map("quote_id") @db.Uuid
+  productId   String?  @map("product_id") @db.Uuid
+  description String?  @db.VarChar(255)
+  quantity    Int?     @default(1)
+  unitPrice   Decimal  @map("unit_price") @db.Decimal(15, 2)
+  total       Decimal  @db.Decimal(15, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  quote   Quote?   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("quote_items")
+}
+
+// PO & SCM
+
+model CustomerPo {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  quoteId        String?  @map("quote_id") @db.Uuid
+  poNumber       String   @map("po_number") @db.VarChar(100)
+  poDate         DateTime? @map("po_date") @db.Date
+  receivedOn     DateTime? @default(now()) @map("received_on") @db.Date
+  status         String?  @default("Received") @db.VarChar(50)
+  documentUrl    String?  @map("document_url")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  quote        Quote?        @relation(fields: [quoteId], references: [id])
+  vendorOrders VendorOrder[]
+  invoices     Invoice[]
+
+  @@map("customer_pos")
+}
+
+model VendorOrder {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  customerPoId   String?  @map("customer_po_id") @db.Uuid
+  vendorName     String?  @map("vendor_name") @db.VarChar(255)
+  status         String?  @default("Draft") @db.VarChar(50)
+  expectedDeliveryDate DateTime? @map("expected_delivery_date") @db.Date
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customerPo   CustomerPo?   @relation(fields: [customerPoId], references: [id])
+  deliveryTracking DeliveryTracking[]
+  grnReceipts GrnReceipt[]
+
+  @@map("vendor_orders")
+}
+
+model GrnReceipt {
+  id            String   @id @default(uuid()) @db.Uuid
+  organizationId String? @map("organization_id") @db.Uuid
+  vendorOrderId String?  @map("vendor_order_id") @db.Uuid
+  receiptDate   DateTime? @default(now()) @map("receipt_date") @db.Date
+  receivedBy    String?  @map("received_by") @db.Uuid
+  itemsReceived Json?    @map("items_received")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendorOrder  VendorOrder?  @relation(fields: [vendorOrderId], references: [id], onDelete: Cascade)
+  receiver     User?         @relation(fields: [receivedBy], references: [id])
+
+  @@map("grn_receipts")
+}
+
+model DeliveryTracking {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String?  @map("organization_id") @db.Uuid
+  vendorOrderId   String?  @map("vendor_order_id") @db.Uuid
+  stage           String?  @db.VarChar(50)
+  location        String?  @db.VarChar(255)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendorOrder  VendorOrder?  @relation(fields: [vendorOrderId], references: [id], onDelete: Cascade)
+
+  @@map("delivery_tracking")
+}
+
+// DEPLOYMENT
+
+model Deployment {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String?   @map("organization_id") @db.Uuid
+  dealId            String?   @map("deal_id") @db.Uuid
+  status            String?   @default("Pending") @db.VarChar(50)
+  engineerId        String?   @map("engineer_id") @db.Uuid
+  scheduledDate     DateTime? @map("scheduled_date") @db.Date
+  completionDate    DateTime? @map("completion_date") @db.Date
+  signoffDocumentUrl String?  @map("signoff_document_url")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  engineer     User?         @relation(fields: [engineerId], references: [id])
+  tasks        DeploymentTask[]
+
+  @@map("deployments")
+}
+
+model DeploymentTask {
+  id             String   @id @default(uuid()) @db.Uuid
+  deploymentId   String?  @map("deployment_id") @db.Uuid
+  taskName       String?  @map("task_name") @db.VarChar(255)
+  isCompleted    Boolean? @default(false) @map("is_completed")
+  completionDate DateTime? @map("completion_date") @db.Timestamptz(6)
+
+  deployment Deployment? @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+
+  @@map("deployment_tasks")
+}
+
+// FINANCE
+
+model Invoice {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  customerPoId   String?  @map("customer_po_id") @db.Uuid
+  invoiceNumber  String   @map("invoice_number") @db.VarChar(50)
+  issueDate      DateTime? @default(now()) @map("issue_date") @db.Date
+  dueDate        DateTime? @map("due_date") @db.Date
+  totalAmount    Decimal  @map("total_amount") @db.Decimal(15, 2)
+  balanceDue     Decimal  @map("balance_due") @db.Decimal(15, 2)
+  status         String?  @default("Draft") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal         Deal?         @relation(fields: [dealId], references: [id])
+  customerPo   CustomerPo?   @relation(fields: [customerPoId], references: [id])
+  payments     Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String?  @map("organization_id") @db.Uuid
+  invoiceId       String?  @map("invoice_id") @db.Uuid
+  amount          Decimal  @db.Decimal(15, 2)
+  paymentDate     DateTime? @default(now()) @map("payment_date") @db.Date
+  method          String?  @db.VarChar(50)
+  referenceNumber String?  @map("reference_number") @db.VarChar(100)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice      Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// TICKETING
+
+model Ticket {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String?   @map("organization_id") @db.Uuid
+  title          String    @db.VarChar(255)
+  description    String?
+  category       String?   @db.VarChar(50)
+  priority       String?   @default("Medium") @db.VarChar(50)
+  status         String?   @default("Open") @db.VarChar(50)
+  createdBy      String?   @map("created_by") @db.Uuid
+  assignedTo     String?   @map("assigned_to") @db.Uuid
+  isEscalated    Boolean?  @default(false) @map("is_escalated")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User?         @relation("TicketCreator", fields: [createdBy], references: [id])
+  assignee     User?         @relation("TicketAssignee", fields: [assignedTo], references: [id])
+  comments     TicketComment[]
+
+  @@map("tickets")
+}
+
+model TicketComment {
+  id             String   @id @default(uuid()) @db.Uuid
+  ticketId       String?  @map("ticket_id") @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  comment        String
+  isInternal     Boolean? @default(false) @map("is_internal")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ticket Ticket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@map("ticket_comments")
+}
