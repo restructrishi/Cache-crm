@@ -3,9 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
+
 
 model Organization {
   id               String   @id @default(uuid()) @db.Uuid
@@ -44,6 +46,9 @@ model Organization {
 
   // SCM
   grnReceipts     GrnReceipt[]
+
+  // Pipeline
+  orderPipelines OrderPipeline[]
 
   @@map("organizations")
 }
@@ -116,6 +121,11 @@ model User {
   ticketsCreated   Ticket[]         @relation("TicketCreator")
   ticketsAssigned  Ticket[]         @relation("TicketAssignee")
   ticketComments   TicketComment[]
+  
+  // Pipeline
+  assignedPipelineSteps PipelineStep[]
+  pipelineLogs          PipelineLog[]
+
   deploymentsEng   Deployment[]
   grnReceivedBy    GrnReceipt[]
   solutionDesignsCreated SolutionDesign[]
@@ -174,6 +184,7 @@ model Account {
   creator      User?         @relation("AccountCreator", fields: [createdBy], references: [id])
   contacts     Contact[]
   deals        Deal[]
+  orderPipelines OrderPipeline[]
 
   @@map("accounts")
 }
@@ -247,6 +258,9 @@ model Deal {
   solutionDesigns SolutionDesign[]
   boqHeaders      BoqHeader[]
   sowDocuments    SowDocument[]
+  
+  // Pipeline
+  orderPipeline   OrderPipeline?
 
   @@map("deals")
 }
@@ -623,4 +637,59 @@ model TicketComment {
   user   User?   @relation(fields: [userId], references: [id])
 
   @@map("ticket_comments")
+}
+
+// PIPELINE
+
+model OrderPipeline {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  accountId      String?  @map("account_id") @db.Uuid
+  dealId         String?  @unique @map("deal_id") @db.Uuid
+  currentStage   String?  @map("current_stage") @db.VarChar(100)
+  status         String?  @default("Active") @db.VarChar(50) // Active, Completed, Cancelled
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  account        Account?      @relation(fields: [accountId], references: [id])
+  deal           Deal?         @relation(fields: [dealId], references: [id])
+
+  steps          PipelineStep[]
+  logs           PipelineLog[]
+
+  @@map("order_pipelines")
+}
+
+model PipelineStep {
+  id             String   @id @default(uuid()) @db.Uuid
+  pipelineId     String?  @map("pipeline_id") @db.Uuid
+  stepName       String   @map("step_name") @db.VarChar(100)
+  assignedRole   String?  @map("assigned_role") @db.VarChar(50)
+  assignedUserId String?  @map("assigned_user_id") @db.Uuid
+  status         String?  @default("PENDING") @db.VarChar(50) // PENDING, IN_PROGRESS, BLOCKED, COMPLETED
+  data           Json?
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  updatedBy      String?   @map("updated_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  pipeline       OrderPipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  assignedUser   User?          @relation(fields: [assignedUserId], references: [id])
+
+  @@map("pipeline_steps")
+}
+
+model PipelineLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  pipelineId     String?  @map("pipeline_id") @db.Uuid
+  stepName       String?  @map("step_name") @db.VarChar(100)
+  action         String   @db.VarChar(100)
+  performedBy    String?  @map("performed_by") @db.Uuid
+  timestamp      DateTime @default(now()) @db.Timestamptz(6)
+
+  pipeline       OrderPipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  user           User?          @relation(fields: [performedBy], references: [id])
+
+  @@map("pipeline_logs")
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Drawer } from '../ui/Drawer';
 import { Loader2 } from 'lucide-react';
+import { createUser } from '../../api/admin';
 
 interface AddMemberDrawerProps {
   isOpen: boolean;
@@ -12,18 +13,16 @@ export const AddMemberDrawer: React.FC<AddMemberDrawerProps> = ({ isOpen, onClos
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
+    fullName: '',
     password: '',
     confirmPassword: '',
-    department: 'Sales',
-    accessLevel: 'VIEW_ONLY',
+    roleName: 'USER',
   });
   const [error, setError] = useState('');
 
-  const departments = ['Sales', 'ISR', 'HR', 'Deployment', 'Finance', 'SCM', 'Presales'];
-  const accessLevels = [
-    { value: 'VIEW_ONLY', label: 'View Only' },
-    { value: 'EDIT_ONLY', label: 'Edit Only' },
-    { value: 'FULL_ACCESS', label: 'View & Edit' },
+  const roles = [
+    { value: 'USER', label: 'User' },
+    { value: 'ORG_ADMIN', label: 'Admin' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,36 +36,22 @@ export const AddMemberDrawer: React.FC<AddMemberDrawerProps> = ({ isOpen, onClos
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      // Use full URL to backend
-      const response = await fetch('http://localhost:3000/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          department: formData.department,
-          accessLevel: formData.accessLevel
-        })
+      await createUser({
+        email: formData.email,
+        fullName: formData.fullName,
+        password: formData.password,
+        roleName: formData.roleName
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to create user');
-      }
 
       onSuccess();
       onClose();
       // Reset form
       setFormData({
         email: '',
+        fullName: '',
         password: '',
         confirmPassword: '',
-        department: 'Sales',
-        accessLevel: 'VIEW_ONLY',
+        roleName: 'USER',
       });
     } catch (err: any) {
       setError(err.message);
@@ -86,6 +71,17 @@ export const AddMemberDrawer: React.FC<AddMemberDrawerProps> = ({ isOpen, onClos
         
         <div className="space-y-4">
             <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                <input
+                    type="text"
+                    required
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+                    placeholder="John Doe"
+                />
+            </div>
+            <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
                 <input
                     type="email"
@@ -97,76 +93,68 @@ export const AddMemberDrawer: React.FC<AddMemberDrawerProps> = ({ isOpen, onClos
                 />
             </div>
 
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+                <input
+                    type="text"
+                    value={formData.department}
+                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+                    placeholder="Sales, Engineering, etc."
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                    <select
+                        value={formData.roleName}
+                        onChange={(e) => setFormData({...formData, roleName: e.target.value})}
+                        className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+                    >
+                        {roles.map(role => (
+                            <option key={role.value} value={role.value}>{role.label}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
                     <input
                         type="password"
                         required
-                        minLength={6}
                         value={formData.password}
                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                         className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
                     <input
                         type="password"
                         required
-                        minLength={6}
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                         className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
                     />
                 </div>
             </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
-                <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({...formData, department: e.target.value})}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
-                >
-                    {departments.map(dept => (
-                        <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Permission Level</label>
-                <div className="space-y-2">
-                    {accessLevels.map((level) => (
-                        <label key={level.value} className="flex items-center p-3 border border-gray-200 dark:border-gray-800 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <input
-                                type="radio"
-                                name="accessLevel"
-                                value={level.value}
-                                checked={formData.accessLevel === level.value}
-                                onChange={(e) => setFormData({...formData, accessLevel: e.target.value})}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                            />
-                            <span className="ml-3 text-sm text-gray-900 dark:text-white font-medium">{level.label}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
         </div>
 
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+        <div className="flex gap-3 pt-4">
             <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
                 Cancel
             </button>
             <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Send Invitation

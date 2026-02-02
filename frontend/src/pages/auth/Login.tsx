@@ -13,34 +13,49 @@ export const Login: React.FC = () => {
         e.preventDefault();
         setLoading(true);
 
-        // Simulate API Call
-        setTimeout(() => {
-            if (email === 'supadmin' && password === 'supadmin') {
-                localStorage.setItem('token', 'super-admin-jwt');
-                localStorage.setItem('user', JSON.stringify({ 
-                    name: 'Super Admin', 
-                    role: 'Super Admin', 
-                    email: 'supadmin@cache.com' 
-                }));
-                setLoading(false);
-                navigate('/welcome');
-            } else if (email && password) {
-                let mockRole = 'User';
-                if (email.includes('admin')) mockRole = 'Admin';
-                
-                localStorage.setItem('token', 'dummy-jwt');
-                localStorage.setItem('user', JSON.stringify({ 
-                    name: 'Demo User', 
-                    role: mockRole, 
-                    email: email 
-                }));
-                setLoading(false);
-                navigate('/welcome');
-            } else {
-                setLoading(false);
-                alert('Please enter credentials');
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Login failed');
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Login failed with status: ${response.status}`);
+                }
             }
-        }, 1000);
+
+            const data = await response.json();
+
+            // Store exactly what backend sends
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            const roles = (data.user.roles || []).map((r: string) => r.toUpperCase());
+
+            setLoading(false);
+
+            // Route dynamically based on roles (Case Insensitive)
+            if (roles.includes('SUPER_ADMIN')) {
+                navigate('/super-admin');
+            } else if (roles.includes('ORG_ADMIN')) {
+                navigate('/admin');
+            } else {
+                navigate('/app');
+            }
+
+        } catch (error: any) {
+            setLoading(false);
+            alert(error.message || 'An error occurred during login');
+        }
     };
 
     return (

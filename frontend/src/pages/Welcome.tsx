@@ -18,32 +18,38 @@ export const Welcome: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const userData = getUser();
-        if (!userData) {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        if (!user) {
             navigate('/login');
             return;
         }
-        setUser(userData);
-        setLoading(false);
 
-        const handleKeyPress = (e: KeyboardEvent) => {
-            if (e.key === 'Enter') {
-                proceed();
-            }
-        };
+        const roles = user.roles || [];
 
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
+        if (roles.length === 0) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/login');
+            return;
+        }
+
+        if (roles.includes('SUPER_ADMIN')) {
+            navigate('/super-admin');
+        } else if (roles.includes('ORG_ADMIN')) {
+            navigate('/admin');
+        } else {
+            navigate('/app');
+        }
     }, [navigate]);
 
     const proceed = () => {
+        // Redundant with useEffect but kept for safety if component mounts before redirect
         if (!user) return;
-        switch (user.role) {
-            case 'Super Admin': navigate('/super-admin'); break;
-            case 'Admin': navigate('/admin'); break;
-            case 'User': navigate('/app'); break;
-            default: navigate('/app');
-        }
+        const roles = user.roles || [];
+        if (roles.includes('SUPER_ADMIN')) navigate('/super-admin');
+        else if (roles.includes('ORG_ADMIN')) navigate('/admin');
+        else navigate('/app');
     };
 
     if (loading) return null;

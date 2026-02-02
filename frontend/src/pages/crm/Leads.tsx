@@ -1,29 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from '../../components/ui/Table';
-import { Plus, Filter, Download } from 'lucide-react';
+import { Plus, Filter, Download, Loader2, AlertCircle, Pencil, Trash } from 'lucide-react';
 import { LeadFormDrawer } from '../../components/crm/leads/LeadFormDrawer';
 import { LeadDetailDrawer } from '../../components/crm/leads/LeadDetailDrawer';
-
-// Mock Data
-const MOCK_LEADS = [
-    { id: '1', name: 'John Doe', company: 'Tech Corp', email: 'john@techcorp.com', status: 'New', source: 'Website', owner: 'Sarah Sales', phone: '+1 555-0123', industry: 'Technology', requirementSummary: 'Looking for a CRM solution for 50 users.' },
-    { id: '2', name: 'Jane Smith', company: 'Global Traders', email: 'jane@global.com', status: 'In Progress', source: 'LinkedIn', owner: 'Mike SCM', phone: '+1 555-0124', industry: 'Logistics', requirementSummary: 'Need SCM module integration.' },
-    { id: '3', name: 'Robert Fox', company: 'Logistics Inc', email: 'robert@logistics.com', status: 'Qualified', source: 'Referral', owner: 'Sarah Sales', phone: '+1 555-0125', industry: 'Transportation', requirementSummary: 'Fleet management software needed.' },
-    { id: '4', name: 'Emily Davis', company: 'SoftSystems', email: 'emily@soft.com', status: 'Converted', source: 'Cold Call', owner: 'John Admin', phone: '+1 555-0126', industry: 'Software', requirementSummary: 'Upgrade existing legacy system.' },
-    { id: '5', name: 'Michael Brown', company: 'Hardware Hub', email: 'mike@hub.com', status: 'Lost', source: 'Unknown', owner: 'Mike SCM', phone: '+1 555-0127', industry: 'Hardware', requirementSummary: 'Price was too high.' },
-];
+import { fetchLeads, createLead, deleteLead } from '../../api/leads';
 
 export const Leads: React.FC = () => {
-    const [leads, setLeads] = useState(MOCK_LEADS);
+    const [leads, setLeads] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
     const [selectedLead, setSelectedLead] = useState<any>(null);
 
-    const handleSaveLead = (newLead: any) => {
-        setLeads(prev => [newLead, ...prev]);
+    const loadLeads = async () => {
+        try {
+            setIsLoading(true);
+            const data = await fetchLeads();
+            setLeads(data);
+            setError(null);
+        } catch (err: any) {
+            console.error('Error loading leads:', err);
+            setError(err.message || 'Failed to load leads');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadLeads();
+    }, []);
+
+    const handleSaveLead = async (leadData: any) => {
+        try {
+            if (!leadData) return;
+            await createLead(leadData);
+            await loadLeads();
+            setIsAddDrawerOpen(false);
+        } catch (err: any) {
+            console.error('Error creating lead:', err);
+            const message = err.response?.data?.message || err.message || 'Failed to create lead';
+            alert(message);
+        }
+    };
+
+    const handleDeleteLead = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this lead?')) return;
+        
+        try {
+            await deleteLead(id);
+            await loadLeads();
+        } catch (err: any) {
+            console.error('Error deleting lead:', err);
+            const message = err.response?.data?.message || err.message || 'Failed to delete lead';
+            alert(message);
+        }
     };
 
     const columns: any[] = [
-        { header: 'Name', accessorKey: 'name', className: 'font-medium text-gray-900 dark:text-white' },
+        { 
+            header: 'Name', 
+            accessorKey: 'name', 
+            className: 'font-medium text-gray-900 dark:text-white',
+            cell: (row: any) => `${row?.firstName || ''} ${row?.lastName || ''}`.trim() || row?.company || 'Unknown'
+        },
         { header: 'Company', accessorKey: 'company' },
         { header: 'Email', accessorKey: 'email' },
         {
@@ -31,19 +70,46 @@ export const Leads: React.FC = () => {
             accessorKey: 'status',
             cell: (row: any) => (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                    ${row.status === 'New' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                        row.status === 'Qualified' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                            row.status === 'Converted' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' :
-                                row.status === 'Lost' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 
+                    ${row?.status === 'New' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                        row?.status === 'Qualified' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                            row?.status === 'Converted' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' :
+                                row?.status === 'Lost' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 
                                 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                     }`}>
-                    {row.status}
+                    {row?.status || 'New'}
                 </span>
             )
         },
         { header: 'Source', accessorKey: 'source' },
-        { header: 'Owner', accessorKey: 'owner' },
+        { 
+            header: 'Owner', 
+            accessorKey: 'owner',
+            cell: (row: any) => row?.owner?.fullName || 'Unassigned'
+        },
     ];
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-96 text-red-500 gap-4">
+                <AlertCircle className="w-12 h-12" />
+                <p className="text-lg font-medium">{error}</p>
+                <button 
+                    onClick={loadLeads}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -72,6 +138,19 @@ export const Leads: React.FC = () => {
                 data={leads}
                 columns={columns}
                 onRowClick={(row) => setSelectedLead(row)}
+                actions={[
+                    {
+                        label: 'Edit',
+                        icon: <Pencil className="w-4 h-4" />,
+                        onClick: (row) => setSelectedLead(row)
+                    },
+                    {
+                        label: 'Delete',
+                        icon: <Trash className="w-4 h-4" />,
+                        className: 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20',
+                        onClick: (row) => handleDeleteLead(row.id)
+                    }
+                ]}
             />
 
             <LeadFormDrawer

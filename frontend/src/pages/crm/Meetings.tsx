@@ -1,109 +1,228 @@
-import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, CheckCircle, FileText, Plus, AlertTriangle } from 'lucide-react';
-
-// Mock Meetings
-const MOCK_MEETINGS = [
-    { id: '1', title: 'Intro Sync with Acme', date: 'Today, 10:00 AM', status: 'Completed', momSubmitted: false, host: 'Sarah Sales' },
-    { id: '2', title: 'Demo for Global Traders', date: 'Today, 2:00 PM', status: 'Scheduled', momSubmitted: false, host: 'Sarah Sales' },
-    { id: '3', title: 'Negotiation with Logistics Inc', date: 'Yesterday', status: 'Completed', momSubmitted: true, host: 'Mike SCM' },
-];
+import React, { useState, useEffect } from 'react';
+import { DataTable } from '../../components/ui/Table';
+import { Plus, Loader2, AlertCircle, Pencil, Trash, FileText, Calendar } from 'lucide-react';
+import { MeetingFormDrawer } from '../../components/crm/meetings/MeetingFormDrawer';
+import { MomDrawer } from '../../components/crm/meetings/MomDrawer';
+import { fetchMeetings, createMeeting, updateMeeting, deleteMeeting, createMom } from '../../api/meetings';
 
 export const Meetings: React.FC = () => {
-    const [meetings, setMeetings] = useState(MOCK_MEETINGS);
-    const [showMomModal, setShowMomModal] = useState<string | null>(null); // Meeting ID
-    const [momText, setMomText] = useState('');
+    const [meetings, setMeetings] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
+    // Drawers state
+    const [isMeetingDrawerOpen, setIsMeetingDrawerOpen] = useState(false);
+    const [isMomDrawerOpen, setIsMomDrawerOpen] = useState(false);
+    const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
 
-    const handleSubmitMom = () => {
-        setMeetings(prev => prev.map(m => m.id === showMomModal ? { ...m, momSubmitted: true } : m));
-        setShowMomModal(null);
-        setMomText('');
+    const loadMeetings = async () => {
+        try {
+            setIsLoading(true);
+            const data = await fetchMeetings();
+            setMeetings(data);
+            setError(null);
+        } catch (err: any) {
+            console.error('Error loading meetings:', err);
+            setError(err.message || 'Failed to load meetings');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    useEffect(() => {
+        loadMeetings();
+    }, []);
+
+    // Meeting Operations
+    const handleSaveMeeting = async (meetingData: any) => {
+        try {
+            if (meetingData.id) {
+                await updateMeeting(meetingData.id, meetingData);
+            } else {
+                await createMeeting(meetingData);
+            }
+            await loadMeetings();
+            setIsMeetingDrawerOpen(false);
+            setSelectedMeeting(null);
+        } catch (err: any) {
+            console.error('Error saving meeting:', err);
+            alert(err.message || 'Failed to save meeting');
+        }
+    };
+
+    const handleDeleteMeeting = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this meeting?')) return;
+        try {
+            await deleteMeeting(id);
+            await loadMeetings();
+        } catch (err: any) {
+            console.error('Error deleting meeting:', err);
+            alert(err.message || 'Failed to delete meeting');
+        }
+    };
+
+    // MOM Operations
+    const handleSaveMom = async (momData: any) => {
+        try {
+            if (!selectedMeeting) return;
+            await createMom(selectedMeeting.id, momData);
+            await loadMeetings();
+            setIsMomDrawerOpen(false);
+            setSelectedMeeting(null);
+        } catch (err: any) {
+            console.error('Error saving MOM:', err);
+            alert(err.message || 'Failed to save MOM');
+        }
+    };
+
+    const openEditMeeting = (meeting: any) => {
+        setSelectedMeeting(meeting);
+        setIsMeetingDrawerOpen(true);
+    };
+
+    const openAddMeeting = () => {
+        setSelectedMeeting(null);
+        setIsMeetingDrawerOpen(true);
+    };
+
+    const openAddMom = (meeting: any) => {
+        setSelectedMeeting(meeting);
+        setIsMomDrawerOpen(true);
+    };
+
+    const columns: any[] = [
+        { 
+            header: 'Title', 
+            accessorKey: 'title', 
+            className: 'font-medium text-gray-900 dark:text-white'
+        },
+        { 
+            header: 'Date & Time', 
+            accessorKey: 'startTime',
+            cell: (row: any) => (
+                <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                        {new Date(row.startTime).toLocaleDateString()}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {new Date(row.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                        {new Date(row.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                </div>
+            )
+        },
+        { 
+            header: 'Related To', 
+            accessorKey: 'related',
+            cell: (row: any) => {
+                if (row.deal) return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Deal: {row.deal.name}</span>;
+                if (row.lead) return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Lead: {row.lead.firstName} {row.lead.lastName}</span>;
+                return '-';
+            }
+        },
+        { 
+            header: 'Host', 
+            accessorKey: 'host',
+            cell: (row: any) => row.host?.fullName || 'Unknown'
+        },
+        { 
+            header: 'Status', 
+            accessorKey: 'status',
+            cell: (row: any) => (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    row.status === 'Completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                    row.status === 'Cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                }`}>
+                    {row.status}
+                </span>
+            )
+        },
+        {
+            header: 'Actions',
+            accessorKey: 'id',
+            className: 'w-[150px]',
+            cell: (row: any) => (
+                <div className="flex items-center gap-2">
+                    {!row.momSubmitted && row.status !== 'Cancelled' && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); openAddMom(row); }}
+                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                            title="Add MOM"
+                        >
+                            <FileText className="w-4 h-4" />
+                        </button>
+                    )}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); openEditMeeting(row); }}
+                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="Edit Meeting"
+                    >
+                        <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteMeeting(row.id); }}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete Meeting"
+                    >
+                        <Trash className="w-4 h-4" />
+                    </button>
+                </div>
+            )
+        }
+    ];
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Meetings & MoM</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Manage calendar and mandatory Minutes of Meeting</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Meetings & MOM</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Schedule meetings and track minutes</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-lg shadow-blue-500/20">
+                <button
+                    onClick={openAddMeeting}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
                     <Plus className="w-4 h-4" /> Schedule Meeting
                 </button>
             </div>
 
-            <div className="grid gap-4">
-                {meetings.map((meeting) => (
-                    <div key={meeting.id} className="bg-white dark:bg-[#1e1e1e] p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex items-center justify-between shadow-sm">
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                <CalendarIcon className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">{meeting.title}</h3>
-                                <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {meeting.date}</span>
-                                    <span className="text-gray-300">•</span>
-                                    <span>Host: {meeting.host}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            {meeting.status === 'Completed' ? (
-                                meeting.momSubmitted ? (
-                                    <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full text-sm font-medium">
-                                        <CheckCircle className="w-4 h-4" /> MoM Submitted
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() => setShowMomModal(meeting.id)}
-                                        className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors animate-pulse"
-                                    >
-                                        <AlertTriangle className="w-4 h-4" /> Submit MoM (Mandatory)
-                                    </button>
-                                )
-                            ) : (
-                                <span className="text-sm text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
-                                    Scheduled
-                                </span>
-                            )}
-                            <button className="text-gray-400 hover:text-gray-600">
-                                <FileText className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Simple MoM Modal */}
-            {showMomModal && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-gray-700">
-                        <h2 className="text-xl font-bold mb-4">Submit Minutes of Meeting</h2>
-                        <textarea
-                            className="w-full h-32 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                            placeholder="Key discussion points, Action items, Next steps..."
-                            value={momText}
-                            onChange={(e) => setMomText(e.target.value)}
-                        />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button
-                                onClick={() => setShowMomModal(null)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSubmitMom}
-                                disabled={!momText}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                Submit MoM
-                            </button>
-                        </div>
-                    </div>
+            {error && (
+                <div className="flex items-center gap-2 p-4 text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
+                    <AlertCircle className="w-5 h-5" />
+                    <p>{error}</p>
                 </div>
             )}
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <DataTable
+                    columns={columns}
+                    data={meetings}
+                    searchKey="title"
+                />
+            </div>
+
+            <MeetingFormDrawer
+                isOpen={isMeetingDrawerOpen}
+                onClose={() => setIsMeetingDrawerOpen(false)}
+                onSave={handleSaveMeeting}
+                initialData={selectedMeeting}
+            />
+
+            <MomDrawer
+                isOpen={isMomDrawerOpen}
+                onClose={() => setIsMomDrawerOpen(false)}
+                onSave={handleSaveMom}
+                meetingTitle={selectedMeeting?.title}
+            />
         </div>
     );
 };

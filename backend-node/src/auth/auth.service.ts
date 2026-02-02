@@ -79,10 +79,11 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        return this.generateToken(user.id, user.email, user.organizationId);
+        return this.generateToken(user.id, user.email, user.organizationId || '');
     }
 
     private async generateToken(userId: string, email: string, organizationId: string) {
+        console.log(`Generating token for user: ${userId}, email: ${email}`);
         const payload = { sub: userId, email, organizationId };
         return {
             access_token: await this.jwtService.signAsync(payload),

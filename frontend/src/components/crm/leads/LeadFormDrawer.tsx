@@ -35,10 +35,29 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validation
+        if (!formData.firstName?.trim() || !formData.lastName?.trim() || !formData.company?.trim() || !formData.email?.trim()) {
+            alert('Please fill in all required fields (First Name, Last Name, Company, Email)');
+            return;
+        }
+
         onSave({
             id: Math.random().toString(36).substr(2, 9),
-            name: `${formData.firstName} ${formData.lastName}`,
-            ...formData,
+            name: `${formData.firstName?.trim() || ''} ${formData.lastName?.trim() || ''}`,
+            firstName: formData.firstName?.trim(),
+            lastName: formData.lastName?.trim(),
+            company: formData.company?.trim(),
+            email: formData.email?.trim() || null,
+            phone: formData.phone?.trim() || null,
+            source: formData.source || 'Website',
+            website: formData.website?.trim() || null,
+            linkedin: formData.linkedin?.trim() || null,
+            status: formData.status || 'New',
+            owner: formData.owner || 'Current User',
+            industry: formData.industry?.trim() || null,
+            requirementSummary: formData.requirementSummary?.trim() || null,
+            expectedDealType: formData.expectedDealType || 'Software',
             createdDate: new Date().toISOString()
         });
         onClose();

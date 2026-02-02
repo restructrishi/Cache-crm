@@ -44,9 +44,9 @@ export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({ isOpen, onCl
             onClose={onClose}
             title={
                 <div className="flex flex-col">
-                    <span className="font-bold text-xl">{lead.name}</span>
+                    <span className="font-bold text-xl">{lead?.name || 'Untitled Lead'}</span>
                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                        <Building2 className="w-3 h-3" /> {lead.company}
+                        <Building2 className="w-3 h-3" /> {lead?.company || 'No Company'}
                     </span>
                 </div>
             }
@@ -65,11 +65,11 @@ export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({ isOpen, onCl
                     <div className="h-6 w-px bg-gray-200 dark:bg-white/10 mx-1" />
                     <span className={cn(
                         "px-2.5 py-1 rounded-full text-xs font-medium border",
-                        lead.status === 'New' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' :
-                        lead.status === 'Qualified' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' :
+                        lead?.status === 'New' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' :
+                        lead?.status === 'Qualified' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' :
                         'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                     )}>
-                        {lead.status}
+                        {lead?.status || 'Unknown'}
                     </span>
                 </div>
             }

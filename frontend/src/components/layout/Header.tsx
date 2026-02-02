@@ -6,7 +6,20 @@ import { ThemeToggle } from '../common/ThemeToggle';
 export const Header: React.FC = () => {
     const user = getUser();
     const name = user?.name || 'Guest';
-    const role = user?.role || 'Visitor';
+    
+    const roleLabelMap: Record<string, string> = {
+        SUPER_ADMIN: 'Super Admin',
+        ORG_ADMIN: 'Admin',
+        USER: 'User'
+    };
+    
+    const roles = user?.roles || [];
+    let userRole = 'USER';
+    if (roles.includes('SUPER_ADMIN')) userRole = 'SUPER_ADMIN';
+    else if (roles.includes('ORG_ADMIN')) userRole = 'ORG_ADMIN';
+    else if (roles.includes('USER')) userRole = 'USER';
+    
+    const role = roleLabelMap[userRole] || userRole;
 
     return (
         <header className="h-16 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 flex items-center justify-between px-6 z-10 transition-all duration-300 sticky top-0">

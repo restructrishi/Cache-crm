@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Building, FileText, Settings, UserPlus, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Building, FileText, UserPlus, Loader2, BarChart3, LayoutDashboard, CheckCircle, XCircle } from 'lucide-react';
 import { AddMemberDrawer } from '../../components/dashboards/AddMemberDrawer';
+import { fetchUsers, updateUserStatus } from '../../api/admin';
 
 interface User {
     id: string;
     fullName: string;
     email: string;
     department: string;
-    accessLevel: string;
     isActive: boolean;
     lastLogin: string | null;
+    userRoles: { role: { name: string } }[];
 }
 
 export const AdminDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchUsers = async () => {
+    const loadUsers = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3000/admin/users', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setUsers(data);
-            }
+            const data = await fetchUsers();
+            setUsers(data);
         } catch (error) {
             console.error('Failed to fetch users', error);
         } finally {
@@ -37,13 +32,24 @@ export const AdminDashboard: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchUsers();
+        loadUsers();
     }, []);
+
+    const handleUpdateStatus = async (id: string, currentStatus: boolean) => {
+        if (!window.confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this user?`)) return;
+        try {
+            await updateUserStatus(id, !currentStatus);
+            loadUsers();
+        } catch (error) {
+            alert('Failed to update user status');
+        }
+    };
 
     // Stats
     const totalUsers = users.length;
-    const departments = new Set(users.map(u => u.department).filter(Boolean)).size;
     const activeUsers = users.filter(u => u.isActive).length;
+    // Count unique roles instead of departments
+    const uniqueRoles = new Set(users.flatMap(u => u.userRoles?.map(ur => ur.role.name) || [])).size;
 
     return (
         <div className="space-y-6">
@@ -52,12 +58,26 @@ export const AdminDashboard: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Overview</h1>
                     <p className="text-sm text-gray-500 mt-1">Manage your organization's resources and team</p>
                 </div>
-                <button 
-                    onClick={() => setIsDrawerOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <UserPlus className="w-4 h-4" /> Invite Member
-                </button>
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => navigate('/admin/analytics')}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <BarChart3 className="w-4 h-4" /> Analytics Dashboard
+                    </button>
+                    <button 
+                        onClick={() => navigate('/admin/my-dashboard')}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <LayoutDashboard className="w-4 h-4" /> My Dashboard
+                    </button>
+                    <button 
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        <UserPlus className="w-4 h-4" /> Invite Member
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -78,8 +98,8 @@ export const AdminDashboard: React.FC = () => {
                             <Building className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{departments}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Roles</p>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{uniqueRoles}</h3>
                         </div>
                     </div>
                 </div>
@@ -110,8 +130,7 @@ export const AdminDashboard: React.FC = () => {
                             <thead>
                                 <tr className="border-b border-gray-100 dark:border-gray-800">
                                     <th className="pb-3 font-semibold">Name / Email</th>
-                                    <th className="pb-3 font-semibold">Department</th>
-                                    <th className="pb-3 font-semibold">Access</th>
+                                    <th className="pb-3 font-semibold">Role</th>
                                     <th className="pb-3 font-semibold">Status</th>
                                     <th className="pb-3 font-semibold">Last Active</th>
                                     <th className="pb-3 font-semibold">Action</th>
@@ -120,7 +139,7 @@ export const AdminDashboard: React.FC = () => {
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="py-8 text-center text-gray-500">
+                                        <td colSpan={5} className="py-8 text-center text-gray-500">
                                             No users found. Invite your first member!
                                         </td>
                                     </tr>
@@ -131,10 +150,9 @@ export const AdminDashboard: React.FC = () => {
                                                 <div>{user.fullName || 'N/A'}</div>
                                                 <div className="text-xs text-gray-500">{user.email}</div>
                                             </td>
-                                            <td className="py-4">{user.department || '-'}</td>
                                             <td className="py-4">
                                                 <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                                    {user.accessLevel?.replace('_', ' ')}
+                                                    {user.userRoles?.[0]?.role?.name || 'USER'}
                                                 </span>
                                             </td>
                                             <td className="py-4">
@@ -149,8 +167,25 @@ export const AdminDashboard: React.FC = () => {
                                             <td className="py-4">
                                                 {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                                             </td>
-                                            <td className="py-4 text-blue-600 hover:text-blue-500 cursor-pointer">
-                                                Edit
+                                            <td className="py-4">
+                                                <button
+                                                    onClick={() => handleUpdateStatus(user.id, user.isActive)}
+                                                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded border transition-colors ${
+                                                        user.isActive 
+                                                        ? 'border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-900/20' 
+                                                        : 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-900/50 dark:hover:bg-green-900/20'
+                                                    }`}
+                                                >
+                                                    {user.isActive ? (
+                                                        <>
+                                                            <XCircle className="w-3 h-3" /> Deactivate
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <CheckCircle className="w-3 h-3" /> Activate
+                                                        </>
+                                                    )}
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -164,7 +199,7 @@ export const AdminDashboard: React.FC = () => {
             <AddMemberDrawer 
                 isOpen={isDrawerOpen} 
                 onClose={() => setIsDrawerOpen(false)}
-                onSuccess={fetchUsers}
+                onSuccess={loadUsers}
             />
         </div>
     );

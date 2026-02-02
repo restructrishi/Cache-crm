@@ -12,7 +12,7 @@ node_modules/
 !.env.example
 
 ############################
-# Backend Build (NestJS)
+# Backend Build (NestJS / Node)
 ############################
 backend-node/dist/
 backend-node/prisma/*.log
@@ -48,11 +48,13 @@ coverage/
 .nyc_output/
 
 ############################
-# Database (Local Only)
+# Database (LOCAL ONLY)
 ############################
 *.sqlite
 *.sqlite3
 *.db
+database/data/
+database/backups/
 
 ############################
 # OS / Editor
@@ -65,10 +67,11 @@ Thumbs.db
 *.swo
 
 ############################
-# Docker
+# Docker (Local runtime data only)
 ############################
 docker-data/
 *.env.docker
+docker-compose.override.yml
 
 ############################
 # Cloud / Hosting
@@ -79,7 +82,7 @@ docker-data/
 .aws/
 
 ############################
-# Security
+# Security / Certificates
 ############################
 *.pem
 *.key
@@ -95,3 +98,4 @@ docker-data/
 ############################
 *.tgz
 *.tar.gz
+.cache/

@@ -23,29 +23,37 @@ import { getUser } from '../../lib/auth';
 
 const NAV_ITEMS = [
     { name: 'Dashboard', path: '', icon: LayoutDashboard }, // Empty path for index
+    { name: 'Analytics', path: 'analytics', icon: BarChart3, allowedRoles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
     { name: 'Leads', path: 'leads', icon: Users },
     { name: 'Accounts', path: 'accounts', icon: Building2 },
     { name: 'Contacts', path: 'contacts', icon: Contact },
     { name: 'Deals', path: 'deals', icon: Briefcase },
     { name: 'Meetings', path: 'meetings', icon: Calendar },
     { name: 'PreSales & Quotes', path: 'quotes', icon: FileText },
+    { name: 'Pipelines', path: 'pipelines', icon: BarChart3 }, // Centralized Pipeline View
     { name: 'Orders (PO)', path: 'orders', icon: ShoppingCart },
-    { name: 'SCM & Inventory', path: 'scm', icon: Truck, allowedRoles: ['Super Admin', 'Admin'] },
-    { name: 'Deployment', path: 'deployment', icon: Hammer, allowedRoles: ['Super Admin', 'Admin'] },
-    { name: 'Finance', path: 'finance', icon: Receipt, allowedRoles: ['Super Admin'] },
+    { name: 'SCM & Inventory', path: 'scm', icon: Truck, allowedRoles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
+    { name: 'Deployment', path: 'deployment', icon: Hammer, allowedRoles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
+    { name: 'Finance', path: 'finance', icon: Receipt, allowedRoles: ['SUPER_ADMIN'] },
     { name: 'Tickets', path: 'tickets', icon: Ticket },
-    { name: 'Reports', path: 'reports', icon: BarChart3, allowedRoles: ['Super Admin', 'Admin'] },
+    { name: 'Reports', path: 'reports', icon: BarChart3, allowedRoles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
 ];
 
 export const Sidebar: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const user = getUser();
-    const role = user?.role || 'User';
+    const roles = user?.roles || [];
+    
+    // Determine primary role for navigation context
+    let role = 'USER';
+    if (roles.includes('SUPER_ADMIN')) role = 'SUPER_ADMIN';
+    else if (roles.includes('ORG_ADMIN')) role = 'ORG_ADMIN';
+    else if (roles.includes('USER')) role = 'USER';
 
     // Determine base path
     let basePath = '/app';
-    if (role === 'Super Admin') basePath = '/super-admin';
-    else if (role === 'Admin') basePath = '/admin';
+    if (role === 'SUPER_ADMIN') basePath = '/super-admin';
+    else if (role === 'ORG_ADMIN') basePath = '/admin';
 
     return (
         <aside
