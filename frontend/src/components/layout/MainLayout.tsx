@@ -6,13 +6,14 @@ import { OnboardingTour } from '../onboarding/OnboardingTour';
 
 export const MainLayout: React.FC = () => {
     return (
-        <div className="flex h-full w-full bg-gray-50/50 dark:bg-black text-gray-900 dark:text-gray-100 font-sans overflow-hidden">
+        <div className="flex h-full w-full bg-[#f8f9fa] dark:bg-black text-slate-900 dark:text-gray-100 font-sans overflow-hidden">
             {/* Sidebar */}
             <Sidebar />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/50 dark:from-blue-900/10 dark:via-transparent dark:to-purple-900/10 pointer-events-none" />
+                {/* Subtle Ambient Background - Professional & Luxury */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-100/50 via-transparent to-transparent dark:from-blue-900/5 dark:via-transparent dark:to-transparent pointer-events-none" />
                 
                 <Header />
 

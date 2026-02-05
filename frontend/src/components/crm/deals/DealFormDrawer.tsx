@@ -91,7 +91,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
             actions={
                 <button
                     onClick={handleSubmit}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                 >
                     <Save className="w-4 h-4" /> Save Deal
                 </button>
@@ -114,7 +114,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 value={formData.name}
                                 onChange={handleChange}
                                 placeholder="e.g. Q1 Software License"
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 required
                             />
                         </div>
@@ -127,7 +127,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 name="accountId"
                                 value={formData.accountId}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             >
                                 <option value="">Select Account</option>
                                 {accounts.map(account => (
@@ -148,7 +148,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 value={formData.amount}
                                 onChange={handleChange}
                                 placeholder="0.00"
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             />
                         </div>
 
@@ -160,7 +160,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 name="stage"
                                 value={formData.stage}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             >
                                 <option value="Qualifying">Qualifying</option>
                                 <option value="Needs Analysis">Needs Analysis</option>
@@ -182,7 +182,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 onChange={handleChange}
                                 min="0"
                                 max="100"
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             />
                         </div>
 
@@ -195,7 +195,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 name="expectedCloseDate"
                                 value={formData.expectedCloseDate}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             />
                         </div>
 
@@ -207,7 +207,7 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                                 name="dealType"
                                 value={formData.dealType}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             >
                                 <option value="New Business">New Business</option>
                                 <option value="Existing Business">Existing Business</option>
@@ -221,13 +221,13 @@ export const DealFormDrawer: React.FC<DealFormDrawerProps> = ({ isOpen, onClose,
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10"
+                        className="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                     >
                         <Save className="w-4 h-4" /> Save Deal
                     </button>

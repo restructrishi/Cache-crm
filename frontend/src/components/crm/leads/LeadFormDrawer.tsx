@@ -72,7 +72,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
             actions={
                 <button
                     onClick={handleSubmit}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                 >
                     <Save className="w-4 h-4" /> Save Lead
                 </button>
@@ -93,7 +93,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="John"
                             />
                         </div>
@@ -104,7 +104,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="Doe"
                             />
                         </div>
@@ -117,7 +117,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                             name="company"
                             value={formData.company}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             placeholder="Acme Corp"
                         />
                     </div>
@@ -131,7 +131,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="john@example.com"
                             />
                         </div>
@@ -141,7 +141,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="+1 (555) 000-0000"
                             />
                         </div>
@@ -154,7 +154,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="source"
                                 value={formData.source}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                             >
                                 <option value="Website">Website</option>
                                 <option value="LinkedIn">LinkedIn</option>
@@ -171,7 +171,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="status"
                                 value={formData.status}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                             >
                                 <option value="New">New</option>
                                 <option value="In Progress">In Progress</option>
@@ -187,7 +187,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="website"
                                 value={formData.website}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="https://example.com"
                             />
                         </div>
@@ -197,7 +197,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="linkedin"
                                 value={formData.linkedin}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="LinkedIn URL"
                             />
                         </div>
@@ -217,7 +217,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="industry"
                                 value={formData.industry}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 placeholder="e.g. Manufacturing"
                             />
                         </div>
@@ -227,7 +227,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 name="expectedDealType"
                                 value={formData.expectedDealType}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                             >
                                 <option value="Hardware">Hardware</option>
                                 <option value="Software">Software</option>
@@ -245,7 +245,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                             value={formData.requirementSummary}
                             onChange={handleChange}
                             rows={4}
-                            className="w-full px-3 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400 resize-none"
                             placeholder="Describe the lead's requirements..."
                         />
                     </div>
@@ -254,7 +254,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                 <div className="flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-white/10">
                     <button
                         type="submit"
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                     >
                         Save Lead
                     </button>
@@ -278,7 +278,7 @@ export const LeadFormDrawer: React.FC<LeadFormDrawerProps> = ({ isOpen, onClose,
                                 expectedDealType: 'Software',
                             });
                         }}
-                        className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="flex-1 bg-white dark:bg-white/5 border border-gray-200/60 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/10 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:shadow-md"
                     >
                         Save & Add Another
                     </button>

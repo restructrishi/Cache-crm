@@ -22,7 +22,7 @@ export const Header: React.FC = () => {
     const role = roleLabelMap[userRole] || userRole;
 
     return (
-        <header className="h-16 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 flex items-center justify-between px-6 z-10 transition-all duration-300 sticky top-0">
+        <header className="h-16 bg-white/90 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 flex items-center justify-between px-6 z-10 transition-all duration-300 sticky top-0">
             {/* Search Bar */}
             <div className="flex-1 max-w-md" data-tour="header-search">
                 <div className="relative group">

@@ -22,6 +22,8 @@ import { Accounts } from './pages/crm/Accounts';
 import { Contacts } from './pages/crm/Contacts';
 import { Meetings } from './pages/crm/Meetings';
 import { Quotes } from './pages/crm/Quotes';
+import { SCM } from './pages/crm/SCM';
+import { Deployment } from './pages/crm/Deployment';
 import PipelineDetail from './pages/pipeline/PipelineDetail';
 import { PipelineList, AccountPipelineList } from './pages/pipeline/PipelineList';
 import { getUser } from './lib/auth';
@@ -30,7 +32,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {/* APP SHELL - ROOT LAYOUT RULE */}
-      <div className="h-screen w-screen overflow-hidden bg-white dark:bg-black text-gray-900 dark:text-gray-100">
+      <div className="h-screen w-screen overflow-hidden bg-[#f8f9fa] dark:bg-black text-slate-900 dark:text-gray-100">
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
@@ -78,8 +80,8 @@ function App() {
                 <Route path="account-pipelines/:accountId" element={<AccountPipelineList />} />
                 
                 {/* Admin/SuperAdmin Restricted Features */}
-                <Route path="scm" element={<PipelineList title="SCM & Inventory" filterStages={["Procurement / Vendor PO", "Delivery & Logistics"]} />} />
-                <Route path="deployment" element={<PipelineList title="Deployment Manager" filterStages={["Deployment"]} />} />
+                <Route path="scm" element={<SCM />} />
+                <Route path="deployment" element={<Deployment />} />
                 <Route path="reports" element={<ComingSoon title="Advanced Reports" features={["Custom Dashboards", "Export to PDF/Excel", "Scheduled Emails"]} />} />
                 
                 {/* Common Features */}
@@ -128,20 +130,9 @@ function App() {
                 <Route path="tickets" element={<ComingSoon title="Support Tickets" features={["Ticket Management", "SLA Tracking", "Customer Portal"]} />} />
                 
                 {/* Role-Specific Access within App Layout - Kept as is but logic might be unreachable if parent guard blocks */}
-                {/* Since we blocked Super Admin and Admin from /app, these inner routes for them might be dead code 
-                    UNLESS 'USER' role is also assigned to them?
-                    Usually Super Admin doesn't have 'USER' role.
-                    The requirement says: "SUPER_ADMIN blocked from /admin & /app".
-                    So these inner routes for SCM/Deployment (allowedRoles=['Super Admin', 'Admin']) will strictly be inaccessible via /app.
-                    They are accessible via /admin (SCM/Deployment are there).
-                    But /super-admin currently only has SuperAdminDashboard.
-                    If Super Admin needs SCM, they should probably go to /super-admin/scm or similar.
-                    But current routes for Super Admin don't include SCM.
-                    I will respect the "SUPER_ADMIN blocked from /admin & /app" constraint strictly.
-                */}
                 <Route path="scm" element={
                     <RoleGuard allowedRoles={['SUPER_ADMIN', 'ORG_ADMIN']}>
-                        <ComingSoon title="SCM & Inventory" features={["Inventory Tracking", "Supplier Management", "Logistics Optimization"]} />
+                        <SCM />
                     </RoleGuard>
                 } />
                 <Route path="deployment" element={

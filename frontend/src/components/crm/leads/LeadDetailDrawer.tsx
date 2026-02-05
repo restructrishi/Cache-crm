@@ -53,13 +53,13 @@ export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({ isOpen, onCl
             width="max-w-4xl"
             actions={
                 <div className="flex items-center gap-2 mr-4">
-                    <button className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Edit Lead">
+                    <button className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors" title="Edit Lead">
                         <Edit3 className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Convert Lead">
+                    <button className="p-2.5 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition-colors" title="Convert Lead">
                         <ArrowRightLeft className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Mark Lost">
+                    <button className="p-2.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors" title="Mark Lost">
                         <XCircle className="w-4 h-4" />
                     </button>
                     <div className="h-6 w-px bg-gray-200 dark:bg-white/10 mx-1" />
@@ -140,7 +140,7 @@ export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({ isOpen, onCl
 
                             <div className="space-y-6">
                                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Requirement Summary</h3>
-                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10">
+                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
                                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                                         {lead.requirementSummary || "No requirements added yet. Click edit to add details about the client's needs."}
                                     </p>

@@ -79,7 +79,7 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
             actions={
                 <button
                     onClick={handleSubmit}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                 >
                     <Save className="w-4 h-4" /> Save MOM
                 </button>
@@ -102,7 +102,7 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                                 onChange={handleChange}
                                 rows={4}
                                 placeholder="Key outcomes and summary of the meeting..."
-                                className="w-full p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400 resize-none"
                                 required
                             />
                         </div>
@@ -117,7 +117,7 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                                 onChange={handleChange}
                                 rows={4}
                                 placeholder="Detailed points discussed..."
-                                className="w-full p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400 resize-none"
                             />
                         </div>
 
@@ -130,7 +130,7 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                                 name="nextFollowUpDate"
                                 value={formData.nextFollowUpDate}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400"
                             />
                         </div>
                     </div>
@@ -144,28 +144,28 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                         <button
                             type="button"
                             onClick={handleAddActionItem}
-                            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline"
                         >
                             <Plus className="w-4 h-4" /> Add Item
                         </button>
                     </div>
                     
                     {formData.actionItems.map((item, index) => (
-                        <div key={index} className="flex gap-4 items-start bg-gray-50 dark:bg-white/5 p-4 rounded-lg">
+                        <div key={index} className="flex gap-4 items-start bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/5">
                             <div className="flex-1 space-y-2">
                                 <input
                                     type="text"
                                     placeholder="Action description"
                                     value={item.description}
                                     onChange={(e) => handleActionItemChange(index, 'description', e.target.value)}
-                                    className="w-full h-9 px-3 rounded border border-gray-200 dark:border-white/10 bg-white dark:bg-black text-sm"
+                                    className="w-full px-3 py-2 bg-white dark:bg-black border border-gray-200/60 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                                 />
                                 <div className="flex gap-2">
                                     <input
                                         type="date"
                                         value={item.dueDate}
                                         onChange={(e) => handleActionItemChange(index, 'dueDate', e.target.value)}
-                                        className="w-40 h-9 px-3 rounded border border-gray-200 dark:border-white/10 bg-white dark:bg-black text-sm"
+                                        className="w-40 px-3 py-2 bg-white dark:bg-black border border-gray-200/60 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                                     />
                                     {/* Placeholder for Owner Selection - future improvement */}
                                 </div>
@@ -173,7 +173,7 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                             <button
                                 type="button"
                                 onClick={() => handleRemoveActionItem(index)}
-                                className="p-1 text-gray-400 hover:text-red-500"
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             >
                                 <Trash className="w-4 h-4" />
                             </button>
@@ -188,13 +188,13 @@ export const MomDrawer: React.FC<MomDrawerProps> = ({ isOpen, onClose, onSave, m
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10"
+                        className="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5"
                     >
                         <Save className="w-4 h-4" /> Save MOM
                     </button>

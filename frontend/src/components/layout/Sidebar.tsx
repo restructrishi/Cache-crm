@@ -58,14 +58,14 @@ export const Sidebar: React.FC = () => {
     return (
         <aside
             className={cn(
-                "relative flex flex-col h-full bg-white dark:bg-black border-r border-gray-100 dark:border-white/10 shadow-2xl shadow-gray-200/50 dark:shadow-none z-20 shrink-0",
+                "relative flex flex-col h-full bg-white dark:bg-black border-r border-gray-200 dark:border-white/10 shadow-xl shadow-gray-200/20 dark:shadow-none z-20 shrink-0",
                 "transition-all duration-300 ease-in-out",
                 collapsed ? "w-[80px]" : "w-[260px]"
             )}
         >
             {/* Logo Area */}
             <div className={cn(
-                "flex items-center h-16 border-b border-gray-100 dark:border-white/10 overflow-hidden transition-all duration-300 ease-in-out",
+                "flex items-center h-16 border-b border-gray-200 dark:border-white/10 overflow-hidden transition-all duration-300 ease-in-out",
                 collapsed ? "pl-6" : "p-4"
             )}>
                 <div className="flex items-center gap-3 min-w-[260px]">

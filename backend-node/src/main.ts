@@ -14,6 +14,7 @@ import meetingsRouter from './modules/meetings/meetings.routes';
 import pipelineRouter from './modules/pipeline/pipeline.routes';
 import uploadRouter from './modules/upload/upload.routes';
 import customerPoRouter from './modules/customer-po/customer-po.routes';
+import deploymentRouter from './modules/deployment/deployment.routes';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,6 +36,7 @@ async function bootstrap() {
   app.use('/api/pipeline', pipelineRouter);
   app.use('/api/upload', uploadRouter);
   app.use('/api/customer-pos', customerPoRouter);
+  app.use('/api/deployments', deploymentRouter);
   
   await app.listen(3000);
 }

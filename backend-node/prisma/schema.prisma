@@ -127,6 +127,8 @@ model User {
   pipelineLogs          PipelineLog[]
 
   deploymentsEng   Deployment[]
+  deploymentsRequested Deployment[] @relation("DeploymentRequester")
+  deploymentsApproved  Deployment[] @relation("DeploymentApprover")
   grnReceivedBy    GrnReceipt[]
   solutionDesignsCreated SolutionDesign[]
 
@@ -542,9 +544,20 @@ model Deployment {
   signoffDocumentUrl String?  @map("signoff_document_url")
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  // Additive Workflow Fields
+  deploymentType    String?   @map("deployment_type") @db.VarChar(50)
+  environment       String?   @db.VarChar(50)
+  priority          String?   @default("Medium") @db.VarChar(20)
+  stage             String?   @default("Request Initiation") @db.VarChar(50)
+  requestedBy       String?   @map("requested_by") @db.Uuid
+  approvedBy        String?   @map("approved_by") @db.Uuid
+  workflowLogs      Json?     @map("workflow_logs") // Audit trail
+
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   deal         Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
   engineer     User?         @relation(fields: [engineerId], references: [id])
+  requester    User?         @relation("DeploymentRequester", fields: [requestedBy], references: [id])
+  approver     User?         @relation("DeploymentApprover", fields: [approvedBy], references: [id])
   tasks        DeploymentTask[]
 
   @@map("deployments")
@@ -556,6 +569,9 @@ model DeploymentTask {
   taskName       String?  @map("task_name") @db.VarChar(255)
   isCompleted    Boolean? @default(false) @map("is_completed")
   completionDate DateTime? @map("completion_date") @db.Timestamptz(6)
+  
+  // Additive
+  stage          String?  @db.VarChar(50) // To link task to workflow stage
 
   deployment Deployment? @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
 
