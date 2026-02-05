@@ -24,6 +24,8 @@ import { Meetings } from './pages/crm/Meetings';
 import { Quotes } from './pages/crm/Quotes';
 import { SCM } from './pages/crm/SCM';
 import { Deployment } from './pages/crm/Deployment';
+import PurchaseOrders from './pages/crm/PurchaseOrders';
+import OrderPipelineDetail from './pages/crm/OrderPipelineDetail';
 import PipelineDetail from './pages/pipeline/PipelineDetail';
 import { PipelineList, AccountPipelineList } from './pages/pipeline/PipelineList';
 import { getUser } from './lib/auth';
@@ -85,15 +87,8 @@ function App() {
                 <Route path="reports" element={<ComingSoon title="Advanced Reports" features={["Custom Dashboards", "Export to PDF/Excel", "Scheduled Emails"]} />} />
                 
                 {/* Common Features */}
-                <Route path="orders" element={<PipelineList title="Purchase Orders" filterStages={[
-                  "Customer PO", 
-                  "Procurement / Vendor PO", 
-                  "Delivery & Logistics", 
-                  "Physical Verification", 
-                  "Deployment", 
-                  "Invoicing", 
-                  "Closure & Support Handover"
-                ]} />} />
+                <Route path="orders" element={<PurchaseOrders />} />
+                <Route path="orders/:id" element={<OrderPipelineDetail />} />
                 <Route path="contacts" element={<Contacts />} />
                 <Route path="accounts" element={<Accounts />} />
                 <Route path="tickets" element={<ComingSoon title="Support Tickets" features={["Ticket Management", "SLA Tracking", "Customer Portal"]} />} />

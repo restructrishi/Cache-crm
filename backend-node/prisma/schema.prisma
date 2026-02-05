@@ -50,6 +50,10 @@ model Organization {
   // Pipeline
   orderPipelines OrderPipeline[]
 
+  purchaseOrders PurchaseOrder[]
+  // Inventory
+  inventory      Inventory[]
+
   @@map("organizations")
 }
 
@@ -133,6 +137,9 @@ model User {
   solutionDesignsCreated SolutionDesign[]
 
   auditLogs AuditLog[]
+  
+  assignedPoSteps PoStep[]
+  uploadedPoDocuments PoDocument[]
 
   @@unique([organizationId, email])
   @@map("users")
@@ -187,6 +194,7 @@ model Account {
   contacts     Contact[]
   deals        Deal[]
   orderPipelines OrderPipeline[]
+  purchaseOrders PurchaseOrder[]
 
   @@map("accounts")
 }
@@ -263,6 +271,7 @@ model Deal {
   
   // Pipeline
   orderPipeline   OrderPipeline?
+  purchaseOrders  PurchaseOrder[]
 
   @@map("deals")
 }
@@ -531,6 +540,101 @@ model DeliveryTracking {
   @@map("delivery_tracking")
 }
 
+// PURCHASE ORDER PIPELINE
+
+model PurchaseOrder {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  dealId         String?  @map("deal_id") @db.Uuid
+  accountId      String?  @map("account_id") @db.Uuid
+  
+  poNumber       String   @map("po_number") @db.VarChar(100)
+  poDate         DateTime? @map("po_date") @db.Date
+  amount         Decimal?  @db.Decimal(15, 2)
+  
+  currentStage   String?   @map("current_stage") @db.VarChar(50)
+  status         String?   @default("In Progress") @db.VarChar(50)
+  
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deal           Deal?         @relation(fields: [dealId], references: [id])
+  account        Account?      @relation(fields: [accountId], references: [id])
+  
+  steps          PoStep[]
+  documents      PoDocument[]
+  items          PoItem[]
+
+  vendorName     String?   @map("vendor_name") @db.VarChar(255)
+  vendorEmail    String?   @map("vendor_email") @db.VarChar(255)
+  vendorPhone    String?   @map("vendor_phone") @db.VarChar(50)
+  terms          String?
+  notes          String?
+
+  @@map("purchase_orders")
+}
+
+model PoItem {
+  id              String   @id @default(uuid()) @db.Uuid
+  purchaseOrderId String   @map("purchase_order_id") @db.Uuid
+  
+  description     String   @db.VarChar(255)
+  quantity        Int
+  unitPrice       Decimal  @map("unit_price") @db.Decimal(15, 2)
+  totalPrice      Decimal  @map("total_price") @db.Decimal(15, 2)
+  
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@map("po_items")
+}
+
+model PoStep {
+  id              String   @id @default(uuid()) @db.Uuid
+  purchaseOrderId String   @map("purchase_order_id") @db.Uuid
+  
+  stepName        String   @map("step_name") @db.VarChar(100)
+  assignedRole    String   @map("assigned_role") @db.VarChar(50)
+  status          String   @default("Pending") @db.VarChar(50)
+  
+  assignedUserId  String?  @map("assigned_user_id") @db.Uuid
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(6)
+  
+  data            Json?
+  
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  assignedUser    User?         @relation(fields: [assignedUserId], references: [id])
+  
+  documents       PoDocument[]
+
+  @@map("po_steps")
+}
+
+model PoDocument {
+  id              String   @id @default(uuid()) @db.Uuid
+  purchaseOrderId String?  @map("purchase_order_id") @db.Uuid
+  stepId          String?  @map("step_id") @db.Uuid
+  
+  type            String   @db.VarChar(50)
+  fileName        String   @map("file_name") @db.VarChar(255)
+  fileUrl         String   @map("file_url")
+  
+  uploadedBy      String?  @map("uploaded_by") @db.Uuid
+  uploadedAt      DateTime @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  step            PoStep?        @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  uploader        User?          @relation(fields: [uploadedBy], references: [id])
+
+  @@map("po_documents")
+}
+
 // DEPLOYMENT
 
 model Deployment {
@@ -708,4 +812,22 @@ model PipelineLog {
   user           User?          @relation(fields: [performedBy], references: [id])
 
   @@map("pipeline_logs")
+}
+
+// INVENTORY
+
+model Inventory {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  itemName       String   @map("item_name") @db.VarChar(255)
+  sku            String?  @db.VarChar(100)
+  quantity       Int      @default(0)
+  category       String?  @db.VarChar(100)
+  location       String?  @db.VarChar(255)
+  status         String?  @default("Available") @db.VarChar(50)
+  lastUpdated    DateTime @default(now()) @map("last_updated") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("inventory")
 }

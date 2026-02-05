@@ -119,7 +119,6 @@ export const PipelineList: React.FC<PipelineListProps> = ({ title, filterStages,
         <DataTable
             columns={columns}
             data={pipelines}
-            searchKey="deal.name"
         />
       </div>
     </div>
