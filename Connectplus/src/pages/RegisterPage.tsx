@@ -1,74 +1,13 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthLayout } from '../../components/landing/AuthLayout';
+import { Link } from 'react-router-dom'
+import { AuthLayout } from './AuthLayout'
 
-const API_BASE = 'http://localhost:3000/api';
-
-export function Signup() {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    organizationName: '',
-    email: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${API_BASE}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          organizationName: formData.organizationName,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || `Signup failed (${response.status})`);
-      }
-
-      const token = data.access_token ?? data.token;
-      const user = data.user ?? {};
-      if (token) localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      const roles = ((user as { roles?: string[] }).roles ?? []).map((r: string) => r.toUpperCase());
-      if (roles.includes('SUPER_ADMIN')) {
-        navigate('/super-admin');
-      } else if (roles.includes('ORG_ADMIN')) {
-        navigate('/admin');
-      } else {
-        navigate('/app');
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Signup failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export function RegisterPage() {
   return (
     <AuthLayout
       title="Create your connect+ workspace"
       subtitle="Establish a governed operating surface that connects sales, delivery, cloud, and compliance."
     >
-      <form onSubmit={handleSignup} className="space-y-4">
-        {error && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
-            {error}
-          </div>
-        )}
+      <form className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="name" className="block text-xs font-medium text-ink-muted">
@@ -78,9 +17,6 @@ export function Signup() {
               id="name"
               type="text"
               autoComplete="name"
-              required
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               className="w-full rounded-2xl border border-white/8 bg-surface-muted/80 px-3 py-2.5 text-sm text-ink-primary shadow-soft-inner outline-none ring-0 transition placeholder:text-ink-muted/50 focus:border-accent-emerald/60 focus:bg-surface-muted focus:ring-2 focus:ring-accent-emerald/40"
             />
           </div>
@@ -92,9 +28,6 @@ export function Signup() {
               id="company"
               type="text"
               autoComplete="organization"
-              required
-              value={formData.organizationName}
-              onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
               className="w-full rounded-2xl border border-white/8 bg-surface-muted/80 px-3 py-2.5 text-sm text-ink-primary shadow-soft-inner outline-none ring-0 transition placeholder:text-ink-muted/50 focus:border-accent-emerald/60 focus:bg-surface-muted focus:ring-2 focus:ring-accent-emerald/40"
             />
           </div>
@@ -107,9 +40,6 @@ export function Signup() {
             id="work-email"
             type="email"
             autoComplete="email"
-            required
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="you@company.com"
             className="w-full rounded-2xl border border-white/8 bg-surface-muted/80 px-3 py-2.5 text-sm text-ink-primary shadow-soft-inner outline-none ring-0 transition placeholder:text-ink-muted/50 focus:border-accent-emerald/60 focus:bg-surface-muted focus:ring-2 focus:ring-accent-emerald/40"
           />
@@ -122,12 +52,23 @@ export function Signup() {
             id="password"
             type="password"
             autoComplete="new-password"
-            required
-            minLength={6}
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full rounded-2xl border border-white/8 bg-surface-muted/80 px-3 py-2.5 text-sm text-ink-primary shadow-soft-inner outline-none ring-0 transition placeholder:text-ink-muted/50 focus:border-accent-emerald/60 focus:bg-surface-muted focus:ring-2 focus:ring-accent-emerald/40"
           />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="domain" className="block text-xs font-medium text-ink-muted">
+            Primary operating region
+          </label>
+          <select
+            id="domain"
+            className="w-full rounded-2xl border border-white/8 bg-surface-muted/80 px-3 py-2.5 text-xs text-ink-primary shadow-soft-inner outline-none ring-0 transition focus:border-accent-emerald/60 focus:bg-surface-muted focus:ring-2 focus:ring-accent-emerald/40"
+          >
+            <option value="">Select a region</option>
+            <option>North America</option>
+            <option>Europe, Middle East & Africa</option>
+            <option>Asia Pacific</option>
+            <option>Latin America</option>
+          </select>
         </div>
         <div className="space-y-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-3 text-[11px] text-emerald-100">
           <div className="flex items-center gap-2">
@@ -141,10 +82,9 @@ export function Signup() {
         </div>
         <button
           type="submit"
-          disabled={loading}
-          className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-accent-emerald via-accent-indigo to-accent-violet px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-ink-primary shadow-soft-lg shadow-accent-emerald/40 transition hover:brightness-110 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-accent-emerald via-accent-indigo to-accent-violet px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-ink-primary shadow-soft-lg shadow-accent-emerald/40 transition hover:brightness-110"
         >
-          {loading ? 'Creating workspace…' : 'Create workspace'}
+          Create workspace
         </button>
       </form>
 
@@ -157,5 +97,6 @@ export function Signup() {
         </div>
       </div>
     </AuthLayout>
-  );
+  )
 }
+

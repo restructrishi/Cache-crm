@@ -1,8 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
+import { LandingShell } from './components/landing/LandingShell';
 import { Login } from './pages/auth/Login';
 import { Signup } from './pages/auth/Signup';
 import { Welcome } from './pages/Welcome';
+import { LandingPage } from './pages/landing/LandingPage';
 import { ComingSoon } from './components/common/ComingSoon';
 import { ThemeProvider } from './context/ThemeContext';
 import AuthGuard from './guards/AuthGuard';
@@ -28,13 +30,12 @@ import PurchaseOrders from './pages/crm/PurchaseOrders';
 import OrderPipelineDetail from './pages/crm/OrderPipelineDetail';
 import PipelineDetail from './pages/pipeline/PipelineDetail';
 import { PipelineList, AccountPipelineList } from './pages/pipeline/PipelineList';
-import { getUser } from './lib/auth';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {/* APP SHELL - ROOT LAYOUT RULE */}
-      <div className="h-screen w-screen overflow-hidden bg-[#f8f9fa] dark:bg-black text-slate-900 dark:text-gray-100">
+      <div className="min-h-screen w-full bg-[#f8f9fa] dark:bg-black text-slate-900 dark:text-gray-100">
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
@@ -147,8 +148,10 @@ function App() {
                 } />
             </Route>
 
+            {/* Landing (public) */}
+            <Route path="/" element={<LandingShell><LandingPage /></LandingShell>} />
+
             {/* Default Redirect */}
-            <Route path="/" element={<Navigate to="/welcome" replace />} />
             <Route path="*" element={<Navigate to="/welcome" replace />} />
           </Routes>
         </BrowserRouter>

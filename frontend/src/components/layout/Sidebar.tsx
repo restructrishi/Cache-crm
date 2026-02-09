@@ -76,7 +76,7 @@ export const Sidebar: React.FC = () => {
                         "font-bold text-xl tracking-tight text-gray-900 dark:text-white transition-all duration-300",
                         collapsed ? "opacity-0 translate-x-4 pointer-events-none" : "opacity-100 translate-x-0"
                     )}>
-                        Cache CRM
+                        CONNECT+
                     </span>
                 </div>
             </div>
